@@ -1,0 +1,1 @@
+web: gunicorn Text_reader:app
