@@ -394,13 +394,13 @@ function playAudio() {         // 오디오 재생
     if (currentAudioUrl) {
         elements.audioPlayer.currentTime = 0;
         elements.audioPlayer.play();
-        elements.playPauseBtn.textContent = '⏸';
+        elements.playPauseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; vertical-align: middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" /></svg>`;
         progressUpdateInterval = setInterval(updateProgress, 100);
     }
 }
 function pauseAudio() {        // 오디오 일시정지
     elements.audioPlayer.pause();
-    elements.playPauseBtn.textContent = '▶';
+    elements.playPauseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; vertical-align: middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" /></svg>`;
     
     if (progressUpdateInterval) {
         clearInterval(progressUpdateInterval);
@@ -604,7 +604,7 @@ elements.playPauseBtn.onclick = function() {
     }
 };
 elements.audioPlayer.onended = function() {                         // 재생이 끝나면 오디오 바를 처음 상태로
-    elements.playPauseBtn.textContent = '▶';
+    elements.playPauseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; vertical-align: middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" /></svg>`;
     elements.progressBar.style.width = '0%';
     
     if (progressUpdateInterval) {
@@ -669,7 +669,7 @@ elements.volumeSlider.addEventListener('input', () => {             //볼륨 슬
     // 음소거 해제(슬라이더를 움직이면 자동으로 음소거 해제)
     if (elements.audioPlayer.muted && elements.audioPlayer.volume > 0) {
         elements.audioPlayer.muted = false;
-        elements.volumeBtn.textContent = '🔊';
+        elements.volumeBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; vertical-align: middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"/></svg>`;
     }
 });
 async function init() {

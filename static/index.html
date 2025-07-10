@@ -34,7 +34,11 @@ body ┬ container ┬ upper-section  ─ ─ ┬ title
         <!-- 오디오 섹션 -->
         <div class="audio-section" id="audioSection">
             <div class="audio-controls">
-                <button class="play-pause-btn" id="playPauseBtn">▶</button>
+                <button class="play-pause-btn" id="playPauseBtn">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; vertical-align: middle;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+                  </svg>
+                </button>
                 <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
                 <div class="progress-container" id="progressContainer">
                     <div class="progress-bar" id="progressBar"></div>
