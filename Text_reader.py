@@ -4,7 +4,6 @@ from murf import Murf
 from flask import Flask, request, send_file, jsonify
 from io import BytesIO
 from dotenv import load_dotenv
-from werkzeug.utils import secure_filename
 # 클라이언트(js)에서 요청을 받아서 처리 하는 함수 ----------------------------------------------------------------------
 app = Flask(__name__, static_folder='static', static_url_path='')   # Flask 앱 초기화
 
