@@ -156,7 +156,6 @@ function updateNumberOptions(voiceList) {
     });
     if (voiceList.length > 0) {
         numberSel.selectedIndex = 0; // 반드시 이 줄이 있어야 함!
-        // numberSel.value = voiceList[0]; // 이 줄은 없어도 됨(선택지는 1,2,3,4니까)
         numberSel.dispatchEvent(new Event('change')); // 필요하다면
     }
 }
@@ -178,7 +177,7 @@ async function convertText() { // 텍스트 변환하기
     elements.format.style.display ='none';
     convertBtn.disabled = true;
 
-    const selectedVoiceId = elements.number.value; // ← 여기만 수정!
+    const selectedVoiceId = elements.number.value;
     setConvertingState(true);
     showStatus('Converting to Audio...', 'info');
 
@@ -395,7 +394,7 @@ function playAudio() {         // 오디오 재생
         elements.audioPlayer.currentTime = 0;
         elements.audioPlayer.play();
         elements.playPauseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; vertical-align: middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" /></svg>`;
-        progressUpdateInterval = setInterval(updateProgress, 100);
+        //progressUpdateInterval = setInterval(updateProgress, 100);
     }
 }
 function pauseAudio() {        // 오디오 일시정지
@@ -627,9 +626,9 @@ elements.progressContainer.onclick = function(e) {                  // 바의 �
         updateProgress();
     }
 };
-setInterval(function() {                                            // 서버에 생존신호 전송
-    fetch('/heartbeat', { method: 'POST' }).catch(() => {});
-}, 2000);
+//setInterval(function() {                                            // 서버에 생존신호 전송
+//    fetch('/heartbeat', { method: 'POST' }).catch(() => {});
+//}, 2000);
 updateButtonState();
 elements.uploadBtn.addEventListener('click', () => {                // 파일 업로드시
     elements.fileInput.click();
