@@ -20,19 +20,6 @@ def heartbeat():
     last_request_time = time.time()
     return 'alive', 200
 
-@app.route('/api/upload', methods=['POST'])                         # 파일 업로드시 "UPLOAD_FOLDER"에 저장하고 성공여부 반환
-def upload_file():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file'}), 400
-    file = request.files['file']
-    if not file or not file.filename:
-        return jsonify({'error': 'No file chosen'}), 400
-
-    filename = secure_filename(file.filename)
-    path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    file.save(path)
-    return jsonify({'message': 'Uploaded', 'filename': filename}), 200
-
 @app.route('/api/filter', methods=['POST'])                         # 드롭다운 선택 시마다 선택지를 전송받아 나머지 드롭다운 필터링
 def filter_options():
     data = request.get_json()
@@ -137,10 +124,6 @@ print("Loaded MURF_API_KEY:", MURF_API_KEY)
 with open('voices.json', encoding='utf-8') as f:
     voice_ids = json.load(f)
     
-# 업로드된 파일 저장 폴더 설정
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 if __name__ == '__main__':
     threading.Thread(target=monitor_browser, daemon=True).start()
