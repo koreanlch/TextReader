@@ -1,23 +1,17 @@
 # 필요한 라이브러리 다운로드 ---------------------------------------------------------------------------------------
-import os, threading, time, webbrowser, requests, json
+import os,  requests, json
 from murf import Murf
-from flask import Flask, request, send_file, jsonify
+from flask import Flask, request, send_file, jsonify, render_template_string
 from io import BytesIO
 from dotenv import load_dotenv
-# 클라이언트(js)에서 요청을 받아서 처리 하는 함수 ----------------------------------------------------------------------
+from gtts import gTTS
+import uuid
+
 app = Flask(__name__, static_folder='static', static_url_path='')   # Flask 앱 초기화
 
-@app.route('/')                                                     # 첫 접속시 최근 요청시간 설정 및 html 반환
+@app.route('/')                                                     # 첫 접속시 html 반환
 def index():
-    global last_request_time
-    last_request_time = time.time()
     return app.send_static_file('index.html')
-
-#@app.route('/heartbeat', methods=['POST'])                          # 최근 요청시간 갱신, "alive"와 성공신호 반환
-#def heartbeat():
-#    global last_request_time
-#    last_request_time = time.time()
-#    return 'alive', 200
 
 @app.route('/api/filter', methods=['POST'])                         # 드롭다운 선택 시마다 선택지를 전송받아 나머지 드롭다운 필터링
 def filter_options():
@@ -25,7 +19,6 @@ def filter_options():
     lang   = data.get('language', '')
     gender = data.get('gender', '')
     age    = data.get('age', '')
-    style  = data.get('style', '')
     voice_id = data.get('voice_id', '')
 
     # voice_list 항목: [id, [languages], gender, age, [styles]]
@@ -53,9 +46,6 @@ def filter_options():
 
 @app.route('/api/synthesize', methods=['POST'])                     # 파라미터를 전송받아 murf에 합성 요청, 오디오 반환
 def synthesize():
-    global last_request_time
-    last_request_time = time.time()
-
     data = request.get_json()
     text = data.get('text', '').strip()
     selected_voice_id = data.get('voice_id','').strip()
@@ -96,22 +86,18 @@ def synthesize():
     except Exception as e:
         return jsonify({'error': f'Error during converting: {e}'}), 500
 
-# 클라이언트 요청 없이 브라우저 동작 관련 함수 ------------------------------------------------------------------------
-#def open_browser():                                                 # 1.5초 후 브라우저 접속
-#    time.sleep(1.5)
-#    webbrowser.open('http://127.0.0.1:5000')
-
-#def monitor_browser():                                              # 브라우저 상태를 확인하여 프로그램 종료
-#    global last_request_time
-#    while True:
-#        time.sleep(1)
-#        if time.time() - last_request_time > 10:  # 10초 동안 heartbeat가 없으면
-#            print("브라우저가 닫혀서 서버를 종료합니다.")
-#            os._exit(0)  # Text_reader.py 완전 종료
+@app.route('/tts', methods=['POST'])
+def tts():
+    text = request.form.get('text')
+    if not text:
+        return {'error': '텍스트를 입력해주세요.'}, 400
+    tts = gTTS(text, lang='ko')
+    filename = f"tts_{uuid.uuid4().hex}.mp3"
+    filepath = os.path.join('static', filename)
+    tts.save(filepath)
+    return {'audio_url': f'/static/{filename}'}
 
 #----------------------------------------------------------------------------------------------------------------
-# 서버 감시용 변수
-last_request_time = time.time()  # 마지막 요청 시간 : 현재시간
 
 # 환경변수로부터 API 키 받아오기 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -125,8 +111,6 @@ with open(os.path.join('static', 'voices.json'), encoding='utf-8') as f:
     
 
 if __name__ == '__main__':
-    #threading.Thread(target=monitor_browser, daemon=True).start()
-    #threading.Thread(target=open_browser, daemon=True).start()  # 이 줄 추가!
     app.run(host='0.0.0.0', port=9002, use_reloader=False, threaded=True)
 
 #  pip install flask python-dotenv requests murf
