@@ -161,102 +161,41 @@ function updateNumberOptions(voiceList) {
 }
 
 // TTS 변환 관련
-async function convertText() { // 텍스트 변환하기
+async function convertText() { // 텍스트 변환하기 (gTTS)
     const text = elements.textInput.value.trim();
     if (!text) {
-        showStatus('Enter text', 'error');
-        elements.convertBtn.disabled = false; // 다시 활성화!
+        showStatus('텍스트를 입력하세요.', 'error');
+        elements.convertBtn.disabled = false;
         return;
     }
-    
-    if (!isLanguageSelected()){
-        showStatus('Select a language first','error');
-        return;
-    }
-    elements.formatLabel.style.display = 'none';
-    elements.format.style.display ='none';
-    convertBtn.disabled = true;
-
-    const selectedVoiceId = elements.number.value;
     setConvertingState(true);
-    showStatus('Converting to Audio...', 'info');
-
+    showStatus('음성으로 변환 중...', 'info');
     try {
-        const response = await fetch('/api/synthesize', {
+        const formData = new FormData();
+        formData.append('text', text);
+        const response = await fetch('/tts', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                text: text,
-                lang:     elements.language.value,
-                gender:   elements.gender.value,
-                age:      elements.age.value,
-                style:    elements.style.value,
-                voice_id: selectedVoiceId,
-                speed:    parseInt(elements.speedRange.value),
-                pitch:    parseInt(elements.pitchRange.value),
-                format:   format.value
-
-            })
+            body: formData
         });
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error || err.errorMessage || 'Failed to convert');
+        const data = await response.json();
+        if (!response.ok || !data.audio_url) {
+            throw new Error(data.error || '변환 실패');
         }
-
-        currentAudioBlob = await response.blob();
-        
-        if (currentAudioUrl) {
-            URL.revokeObjectURL(currentAudioUrl);
-        }
-        
-        currentAudioUrl = URL.createObjectURL(currentAudioBlob);
-        elements.audioPlayer.src = currentAudioUrl;
+        const audioUrl = data.audio_url;
+        elements.audioPlayer.src = audioUrl;
         elements.audioPlayer.load();
-        await new Promise((resolve, reject) => {
-            elements.audioPlayer.oncanplaythrough = resolve;
-            elements.audioPlayer.onerror = reject;
-        });
-        
         isConverted = true;
         setConvertingState(false);
         setTextLocked(true);
         updateButtonState();
-        // 변환 완료 후 볼륨 슬라이더/버튼 활성화
         elements.volumeSlider.disabled = false;
         elements.volumeBtn.disabled = false;
         elements.volumeSlider.style.pointerEvents = 'auto';
         elements.volumeSlider.style.opacity = '1';
         elements.volumeBtn.style.pointerEvents = 'auto';
         elements.volumeBtn.style.opacity = '1';
-
-        elements.fileInput.addEventListener('change', async () => {
-            const file = elements.fileInput.files[0];
-            if (!file) return;
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            showStatus('Uploading...', 'info');
-            try {
-                const res = await fetch('/api/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-                if (!res.ok) throw new Error();
-                const data = await res.json();
-                showStatus(`Successfully Uploaded : ${data.filename}`, 'success');
-            } catch (err) {
-                console.error(err);
-                showStatus('Failed to upload.', 'error');
-            } finally {
-                elements.fileInput.value = '';
-            }
-        });
         elements.progressContainer.style.pointerEvents = 'auto';
         elements.progressContainer.style.opacity = '1';
-
         ['playPauseBtn','volumeBtn'].forEach(id=>{
           const btn = document.getElementById(id);
           btn.style.pointerEvents = 'auto';
@@ -264,12 +203,19 @@ async function convertText() { // 텍스트 변환하기
         });
         const totalTime = formatTime(elements.audioPlayer.duration);
         elements.timeDisplay.textContent = `0:00 / ${totalTime}`;
-        
-        showStatus('Converting finished!', 'success');
-
+        showStatus('변환 완료!', 'success');
+        // 다운로드 버튼에 url 저장
+        elements.downloadBtn.onclick = function() {
+            const a = document.createElement('a');
+            a.href = audioUrl;
+            a.download = 'tts.mp3';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
     } catch (error) {
-        console.error('Converting Error:', error);
-        showStatus('An error occured during Converting.', 'error');
+        console.error('변환 오류:', error);
+        showStatus('변환 중 오류 발생', 'error');
         setConvertingState(false);
     }
 }
@@ -626,10 +572,6 @@ elements.progressContainer.onclick = function(e) {                  // 바의 �
         updateProgress();
     }
 };
-//setInterval(function() {                                            // 서버에 생존신호 전송
-//    fetch('/heartbeat', { method: 'POST' }).catch(() => {});
-//}, 2000);
-updateButtonState();
 elements.uploadBtn.addEventListener('click', () => {                // 파일 업로드시
     elements.fileInput.click();
 });
